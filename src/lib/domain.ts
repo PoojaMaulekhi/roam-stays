@@ -26,6 +26,8 @@ export type Stay = {
 export type StayFilters = {
   location?: string;
   category?: string;
+  checkIn?: string;
+  checkOut?: string;
   guests?: number;
   minPrice?: number;
   maxPrice?: number;
@@ -52,6 +54,11 @@ export type Booking = {
   taxes: number;
   total: number;
   status: string;
+  paymentStatus: "paid" | "pending" | "refunded";
+  customerName?: string;
+  customerEmail?: string;
+  customerPhone?: string | null;
+  createdAt?: string;
 };
 
 export type SessionUser = {

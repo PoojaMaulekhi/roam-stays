@@ -410,6 +410,11 @@ function initializeDatabase() {
     );
   `);
 
+  const userColumns = database.prepare("PRAGMA table_info(users)").all() as { name: string }[];
+  if (!userColumns.some((column) => column.name === "phone")) {
+    database.exec("ALTER TABLE users ADD COLUMN phone TEXT");
+  }
+
   const categories = [
     ["views", "Amazing views"],
     ["cabins", "Cabins"],
@@ -527,6 +532,16 @@ export function getStays(filters: StayFilters = {}) {
     values.push(filters.category);
   }
 
+  if (filters.checkIn && filters.checkOut && filters.checkOut > filters.checkIn) {
+    clauses.push(`NOT EXISTS (
+      SELECT 1 FROM bookings
+      WHERE bookings.property_slug = properties.slug
+        AND bookings.status IN ('pending_payment', 'confirmed')
+        AND bookings.check_in < ? AND bookings.check_out > ?
+    )`);
+    values.push(filters.checkOut, filters.checkIn);
+  }
+
   if (filters.guests && filters.guests > 0) {
     clauses.push("max_guests >= ?");
     values.push(filters.guests);
@@ -573,6 +588,13 @@ export function getStays(filters: StayFilters = {}) {
   const rows = db.prepare(`${staySelect} WHERE ${clauses.join(" AND ")} ORDER BY ${sort}`).all(...values);
 
   return rows.map(toStay);
+}
+
+export function getAdminStays() {
+  return db.prepare(`${staySelect} ORDER BY properties.created_at DESC`).all().map((row) => ({
+    ...toStay(row),
+    status: String(row.status),
+  }));
 }
 
 export function getStay(slug: string): Stay | null {

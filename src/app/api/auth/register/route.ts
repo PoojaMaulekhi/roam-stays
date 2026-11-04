@@ -3,9 +3,6 @@ import { db } from "@/lib/db";
 import type { SessionUser } from "@/lib/domain";
 import { configuredAdmins, createPasswordHash, createSessionToken, isValidEmail, sessionCookie } from "@/lib/session";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
-
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json() as { name?: string; email?: string; password?: string };

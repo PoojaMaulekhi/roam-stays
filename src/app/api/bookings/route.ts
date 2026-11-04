@@ -3,9 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { db, getStay } from "@/lib/db";
 import { currentUser } from "@/lib/session";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
-
 function validDate(value: string) {
   return /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(`${value}T00:00:00Z`));
 }
@@ -19,14 +16,28 @@ export async function GET(request: NextRequest) {
       properties.location, properties.images, bookings.check_in AS checkIn,
       bookings.check_out AS checkOut, bookings.guests, bookings.nights,
       bookings.nightly_price AS nightlyPrice, bookings.cleaning_fee AS cleaningFee,
-      bookings.service_fee AS serviceFee, bookings.taxes, bookings.total, bookings.status
-    FROM bookings JOIN properties ON properties.slug = bookings.property_slug
+      bookings.service_fee AS serviceFee, bookings.taxes, bookings.total, bookings.status,
+      bookings.created_at AS createdAt, users.name AS customerName, users.email AS customerEmail,
+      users.phone AS customerPhone,
+      (SELECT payments.status FROM payments WHERE payments.booking_id = bookings.id ORDER BY payments.created_at DESC LIMIT 1) AS paymentStatus
+    FROM bookings
+    JOIN properties ON properties.slug = bookings.property_slug
+    JOIN users ON users.id = bookings.user_id
     WHERE bookings.user_id = ? ORDER BY bookings.created_at DESC
-  `).all(user.id).map((booking) => ({
-    ...booking,
-    image: (JSON.parse(String(booking.images)) as string[])[0],
-    images: undefined,
-  }));
+  `).all(user.id).map((booking) => {
+    const rawPaymentStatus = String(booking.paymentStatus ?? "").toLowerCase();
+    const paymentStatus: "paid" | "pending" | "refunded" = rawPaymentStatus === "refunded"
+      ? "refunded"
+      : rawPaymentStatus === "paid" || rawPaymentStatus === "succeeded" || String(booking.status) === "confirmed"
+        ? "paid"
+        : "pending";
+    return {
+      ...booking,
+      paymentStatus,
+      image: (JSON.parse(String(booking.images)) as string[])[0],
+      images: undefined,
+    };
+  });
 
   return NextResponse.json({ bookings });
 }

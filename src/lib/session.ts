@@ -1,12 +1,19 @@
 import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
 import type { NextRequest } from "next/server";
 import type { SessionUser } from "@/lib/domain";
+import { db } from "@/lib/db";
 
 const cookieName = "roam_session";
 const sessionLifetime = 60 * 60 * 24 * 10;
 
 function sessionSecret() {
-  return process.env.SESSION_SECRET ?? "local-development-secret-change-before-deploy";
+  const secret = process.env.SESSION_SECRET;
+  if (secret?.trim()) {
+    if (process.env.NODE_ENV === "production" && secret.length < 32) throw new Error("SESSION_SECRET must be at least 32 characters in production.");
+    return secret;
+  }
+  if (process.env.NODE_ENV === "production") throw new Error("SESSION_SECRET is required in production.");
+  return "local-development-secret-change-before-deploy";
 }
 
 function sign(payload: string) {
@@ -53,7 +60,32 @@ export function readSessionToken(token: string | undefined): SessionUser | null 
 }
 
 export function currentUser(request: NextRequest) {
-  return readSessionToken(request.cookies.get(cookieName)?.value);
+  const tokenUser = readSessionToken(request.cookies.get(cookieName)?.value);
+  if (!tokenUser) return null;
+
+  const record = db.prepare("SELECT id, name, email, role FROM users WHERE id = ?").get(tokenUser.id);
+  if (!record) return null;
+
+  return {
+    id: Number(record.id),
+    name: String(record.name),
+    email: String(record.email),
+    role: record.role === "admin" ? "admin" as const : "guest" as const,
+  } satisfies SessionUser;
+}
+
+export function isSameOriginMutation(request: NextRequest) {
+  const origin = request.headers.get("origin")?.trim();
+  const fetchSite = request.headers.get("sec-fetch-site")?.toLowerCase();
+
+  if (fetchSite && fetchSite !== "same-origin") return false;
+  if (!origin) return fetchSite === "same-origin";
+
+  try {
+    return new URL(origin).host === request.headers.get("host") || new URL(origin).host === request.nextUrl.host;
+  } catch {
+    return false;
+  }
 }
 
 export function sessionCookie(token: string, secure: boolean) {

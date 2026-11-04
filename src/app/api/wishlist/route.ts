@@ -2,9 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { getStay, getWishlist, toggleWishlist } from "@/lib/db";
 import { currentUser } from "@/lib/session";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
-
 export async function GET(request: NextRequest) {
   const user = currentUser(request);
   if (!user) return NextResponse.json({ error: "Sign in to see saved stays." }, { status: 401 });

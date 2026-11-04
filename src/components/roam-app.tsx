@@ -40,6 +40,7 @@ function buildQuery(filters: StayFilters, checkIn: string, checkOut: string) {
 
 export function RoamApp() {
   const [stays, setStays] = useState<Stay[]>([]);
+  const [categoryRecords, setCategoryRecords] = useState<{ slug: string; label: string }[]>([]);
   const [saved, setSaved] = useState<Set<string>>(new Set());
   const [user, setUser] = useState<SessionUser | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
@@ -53,8 +54,11 @@ export function RoamApp() {
   const [location, setLocation] = useState("");
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
+  const [today, setToday] = useState("");
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
+  const [infants, setInfants] = useState(0);
+  const [guestPopoverOpen, setGuestPopoverOpen] = useState(false);
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(30000);
   const [minRating, setMinRating] = useState(0);
@@ -69,7 +73,9 @@ export function RoamApp() {
     const filters: StayFilters = {
       location,
       category: activeCategory,
-      guests: adults + children,
+      checkIn: checkIn || undefined,
+      checkOut: checkOut || undefined,
+      guests: adults + children + infants,
       minPrice: minPrice || undefined,
       maxPrice: maxPrice < 30000 ? maxPrice : undefined,
       minRating: minRating || undefined,
@@ -82,25 +88,35 @@ export function RoamApp() {
     try {
       const query = buildQuery(filters, checkIn, checkOut);
       const response = await fetch(`/api/stays${query ? `?${query}` : ""}`, { cache: "no-store" });
-      const result = await response.json() as { stays: Stay[] };
+      const result = await response.json() as { stays: Stay[]; categories: { slug: string; label: string }[] };
       setStays(result.stays ?? []);
+      setCategoryRecords(result.categories ?? []);
     } catch {
       setToast("We couldn’t load stays. Check the local server and try again.");
     } finally {
       setLoading(false);
     }
-  }, [activeCategory, adults, amenities, bedrooms, checkIn, checkOut, children, instantBook, location, maxPrice, minPrice, minRating, sort]);
+  }, [activeCategory, adults, amenities, bedrooms, checkIn, checkOut, children, infants, instantBook, location, maxPrice, minPrice, minRating, sort]);
 
   useEffect(() => {
-    void loadStays();
+    const timer = window.setTimeout(() => {
+      setToday(new Date().toISOString().slice(0, 10));
+      if (new URLSearchParams(window.location.search).get("signin") === "1") {
+        setAuthMessage("Sign in to continue to the requested portal.");
+        setAuthOpen(true);
+      }
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => void loadStays(), 0);
     fetch("/api/auth/me").then((response) => response.json()).then((result: { user: SessionUser | null }) => setUser(result.user)).catch(() => undefined);
+    return () => window.clearTimeout(timer);
   }, [loadStays]);
 
   useEffect(() => {
-    if (!user) {
-      setSaved(new Set());
-      return;
-    }
+    if (!user) return;
     fetch("/api/wishlist").then((response) => response.ok ? response.json() : Promise.reject()).then((result: { stays: Stay[] }) => setSaved(new Set(result.stays.map((stay) => stay.slug)))).catch(() => undefined);
   }, [user]);
 
@@ -154,10 +170,12 @@ export function RoamApp() {
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" });
     setUser(null);
+    setSaved(new Set());
     setAccountMenuOpen(false);
     setToast("You’re signed out.");
   }
 
+  const guestCount = adults + children + infants;
   const dateLabel = checkIn && checkOut
     ? `${new Date(`${checkIn}T00:00:00`).toLocaleDateString("en-IN", { day: "numeric", month: "short" })} – ${new Date(`${checkOut}T00:00:00`).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}`
     : undefined;
@@ -169,11 +187,11 @@ export function RoamApp() {
           <Link className="brand-mark" href="/" aria-label="Roam stays home"><span className="brand-mark__symbol">r.</span><span>roam<span className="brand-mark__sub">stays</span></span></Link>
           <nav className="header-links" aria-label="Main navigation">
             <a className="header-links__active" href="#stays">Find a stay</a>
-            <a href="/trips">Your trips</a>
+            <a href="/my-bookings">My bookings</a>
             <a href="/saved">Saved</a>
           </nav>
           <div className="header-actions">
-            <a className="host-link" href="/admin">List your place <span>↗</span></a>
+            {user?.role === "admin" && <a className="host-link" href="/admin">Admin portal <span>↗</span></a>}
             <div className="account-anchor">
               <button className="account-button" type="button" aria-label="Open account menu" aria-expanded={accountMenuOpen} onClick={() => setAccountMenuOpen((open) => !open)}>
                 <Icon name="menu" size={18} /><span className="account-avatar"><Icon name="user" size={16} /></span>
@@ -181,7 +199,7 @@ export function RoamApp() {
               {accountMenuOpen && <div className="account-menu" role="menu">
                 {user ? <>
                   <p className="account-menu__hello">Hello, {user.name.split(" ")[0]}</p>
-                  <Link href="/trips" role="menuitem" onClick={() => setAccountMenuOpen(false)}>Your trips</Link>
+                  <Link href="/my-bookings" role="menuitem" onClick={() => setAccountMenuOpen(false)}>My bookings</Link>
                   <Link href="/saved" role="menuitem" onClick={() => setAccountMenuOpen(false)}>Saved stays</Link>
                   {user.role === "admin" && <Link href="/admin" role="menuitem" onClick={() => setAccountMenuOpen(false)}>Manage Roam</Link>}
                   <button type="button" role="menuitem" onClick={logout}>Sign out</button>
@@ -203,28 +221,31 @@ export function RoamApp() {
             </div>
             <div className="search-segment search-segment--date">
               <label htmlFor="check-in">Check in</label>
-              <input id="check-in" type="date" min={new Date().toISOString().slice(0, 10)} value={checkIn} onChange={(event) => { setCheckIn(event.target.value); if (checkOut && event.target.value >= checkOut) setCheckOut(""); }} />
+              <input id="check-in" type="date" min={today} value={checkIn} onChange={(event) => { setCheckIn(event.target.value); if (checkOut && event.target.value >= checkOut) setCheckOut(""); }} />
             </div>
             <div className="search-segment search-segment--date">
               <label htmlFor="check-out">Check out</label>
-              <input id="check-out" type="date" min={checkIn || new Date().toISOString().slice(0, 10)} value={checkOut} onChange={(event) => setCheckOut(event.target.value)} />
+              <input id="check-out" type="date" min={checkIn || today} value={checkOut} onChange={(event) => setCheckOut(event.target.value)} />
             </div>
             <div className="search-segment search-segment--guests">
-              <label htmlFor="guest-count">Who</label>
-              <select id="guest-count" value={adults + children} onChange={(event) => setAdults(Math.max(1, Number(event.target.value) - children))}>
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((guest) => <option value={guest} key={guest}>{guest} {guest === 1 ? "guest" : "guests"}</option>)}
-              </select>
+              <span className="search-segment__label">Who</span>
+              <button className="search-guest-trigger" type="button" aria-expanded={guestPopoverOpen} onClick={() => setGuestPopoverOpen((open) => !open)}>{guestCount} {guestCount === 1 ? "guest" : "guests"}</button>
             </div>
             <button className="search-submit" type="submit" aria-label="Search stays"><Icon name="search" size={19} /><span>Search</span></button>
             <button className="search-mobile-toggle" type="button" onClick={() => setSearchOpen((open) => !open)} aria-label="Toggle search fields"><Icon name={searchOpen ? "close" : "search"} size={19} /></button>
           </form>
+          {guestPopoverOpen && <div className="guest-popover" role="group" aria-label="Choose guests">{[["Adults", adults, setAdults, "Ages 13 or above"], ["Children", children, setChildren, "Ages 2–12"], ["Infants", infants, setInfants, "Under 2"]].map(([label, count, setCount, detail]) => <div className="guest-row" key={String(label)}><span><strong>{String(label)}</strong><small>{String(detail)}</small></span><div><button type="button" aria-label={`Remove one ${String(label).toLowerCase()}`} disabled={Number(count) === (label === "Adults" ? 1 : 0)} onClick={() => (setCount as (value: (current: number) => number) => void)((current) => Math.max(label === "Adults" ? 1 : 0, current - 1))}><Icon name="minus" size={14} /></button><strong>{String(count)}</strong><button type="button" aria-label={`Add one ${String(label).toLowerCase()}`} disabled={guestCount >= 10} onClick={() => (setCount as (value: (current: number) => number) => void)((current) => current + 1)}><Icon name="plus" size={14} /></button></div></div>)}</div>}
         </div>
       </header>
 
       <div className="category-bar-wrap">
         <nav className="category-bar" aria-label="Stay categories">
           <button className={`category-item${activeCategory === "" ? " is-active" : ""}`} type="button" onClick={() => void selectCategory("")}><Icon name="globe" size={22} /><span>All stays</span></button>
-          {categories.map((category) => <button className={`category-item${activeCategory === category.value ? " is-active" : ""}`} type="button" key={category.label} onClick={() => void selectCategory(category.value ?? category.label)}><Icon name={category.icon} size={22} /><span>{category.label}</span></button>)}
+          {(categoryRecords.length ? categoryRecords : categories.map((category) => ({ slug: category.label.toLowerCase().replaceAll(" ", "-"), label: category.label }))).map((category) => {
+            const configured = categories.find((item) => item.value === category.label || item.label === category.label);
+            const icon: IconName = configured?.icon ?? (category.slug.includes("pool") ? "pool" : category.slug.includes("farm") ? "farm" : category.slug.includes("beach") ? "waves" : category.slug.includes("cabin") ? "cabin" : "sparkles");
+            return <button className={`category-item${activeCategory === category.label ? " is-active" : ""}`} type="button" key={category.slug} onClick={() => void selectCategory(category.label)}><Icon name={icon} size={22} /><span>{category.label}</span></button>;
+          })}
         </nav>
         <button className="filter-trigger" type="button" onClick={() => setFiltersOpen(true)}><Icon name="filter" size={17} /> Filters {(minPrice || minRating || bedrooms || instantBook || amenities.length) ? <span className="filter-count">{Number(Boolean(minPrice || minRating || bedrooms || instantBook)) + amenities.length}</span> : null}</button>
       </div>
@@ -234,7 +255,7 @@ export function RoamApp() {
         <div className="sort-control"><label htmlFor="sort-stays">Sort</label><select id="sort-stays" value={sort} onChange={(event) => { const value = event.target.value as StayFilters["sort"]; setSort(value); void loadStays({ sort: value }); }}><option value="recommended">Recommended</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option><option value="rating">Top rated</option></select></div>
       </section>
 
-      <div className="results-meta"><span>{loading ? "Finding places" : `${stays.length} ${stays.length === 1 ? "stay" : "stays"} to explore`}</span>{dateLabel && <span><Icon name="calendar" size={14} /> {dateLabel}</span>}{(adults + children) > 0 && <span>{adults + children} guests</span>}</div>
+      <div className="results-meta"><span>{loading ? "Finding places" : `${stays.length} ${stays.length === 1 ? "stay" : "stays"} to explore`}</span>{dateLabel && <span><Icon name="calendar" size={14} /> {dateLabel}</span>}{guestCount > 0 && <span>{guestCount} guests</span>}</div>
 
       <section className="stay-grid" aria-live="polite" aria-label="Available stays">
         {loading ? Array.from({ length: 8 }, (_, index) => <div className="stay-skeleton" key={index}><span /><i /><i /><i /></div>) : stays.length ? stays.map((stay) => <StayCard key={stay.slug} stay={stay} saved={saved.has(stay.slug)} onSave={saveStay} dates={dateLabel} />) : <div className="empty-results"><span className="empty-results__mark"><Icon name="compass" size={28} /></span><h2>No stays found just yet</h2><p>Try a nearby destination or open up the filters to see more places.</p><button className="button button--outline" type="button" onClick={() => { setLocation(""); setActiveCategory(""); setMinPrice(0); setMaxPrice(30000); setMinRating(0); setBedrooms(0); setInstantBook(false); setAmenities([]); void loadStays({ location: undefined, category: undefined, minPrice: undefined, maxPrice: undefined, minRating: undefined, bedrooms: undefined, instantBook: false, amenities: [] }); }}>Clear your search</button></div>}
