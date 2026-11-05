@@ -5,8 +5,8 @@ const nextConfig: NextConfig = {
   output: "export",
   trailingSlash: true,
   basePath: "/roam-stays",
-  cacheComponents: true,
-  partialPrefetching: true,
+  cacheComponents: false,
+  partialPrefetching: false,
   turbopack: {
     rules: {
       "*.css": {
