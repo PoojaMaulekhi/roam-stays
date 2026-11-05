@@ -266,7 +266,16 @@ export function RoamApp({ initialStays = [], initialCategories = [] }: RoamAppPr
         {loading ? Array.from({ length: 8 }, (_, index) => <div className="stay-skeleton" key={index}><span /><i /><i /><i /></div>) : stays.length ? stays.map((stay) => <StayCard key={stay.slug} stay={stay} saved={saved.has(stay.slug)} onSave={saveStay} dates={dateLabel} />) : <div className="empty-results"><span className="empty-results__mark"><Icon name="compass" size={28} /></span><h2>No stays found just yet</h2><p>Try a nearby destination or open up the filters to see more places.</p><button className="button button--outline" type="button" onClick={() => { setLocation(""); setActiveCategory(""); setMinPrice(0); setMaxPrice(30000); setMinRating(0); setBedrooms(0); setInstantBook(false); setAmenities([]); void loadStays({ location: undefined, category: undefined, minPrice: undefined, maxPrice: undefined, minRating: undefined, bedrooms: undefined, instantBook: false, amenities: [] }); }}>Clear your search</button></div>}
       </section>
 
-      <footer className="site-footer"><div className="footer-note"><span className="brand-mark__symbol">r.</span><span>Considered places. Better getaways.</span></div><div className="footer-links"><a href="#about">About Roam</a><a href="#help">Help centre</a><a href="#terms">Terms</a><a href="#privacy">Privacy</a></div><span className="footer-copyright">© 2026 Roam Stays · India</span></footer>
+      <footer className="site-footer">
+        <div className="footer-note"><span className="brand-mark__symbol">r.</span><span>Considered places. Better getaways.</span></div>
+        <nav className="footer-links" aria-label="Footer navigation">
+          <Link href="/#stays">About Roam</Link>
+          <Link href="/#stays">Help centre</Link>
+          <Link href="/#stays">Terms</Link>
+          <Link href="/#stays">Privacy</Link>
+        </nav>
+        <span className="footer-copyright">© 2026 Roam Stays · India</span>
+      </footer>
 
       {filtersOpen && <div className="modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setFiltersOpen(false); }}><section className="filter-dialog" role="dialog" aria-modal="true" aria-labelledby="filter-title">
         <div className="filter-dialog__header"><button className="icon-button" type="button" onClick={() => setFiltersOpen(false)} aria-label="Close filters"><Icon name="close" /></button><h2 id="filter-title">Filters</h2><button className="filter-reset" type="button" onClick={() => { setMinPrice(0); setMaxPrice(30000); setMinRating(0); setBedrooms(0); setInstantBook(false); setAmenities([]); }}>Clear all</button></div>

@@ -87,7 +87,7 @@ export function StayDetail({ slug, initialStay, initialReviews = [] }: { slug: s
   }
 
   if (loading) return <><SecondaryNav /><main className="detail-page"><div className="stay-skeleton"><span /><i /><i /></div></main></>;
-  if (!stay) return <><SecondaryNav /><main className="page-empty"><h2>We couldn’t find that stay</h2><p>{error}</p><Link className="button button--dark" href="/">Explore all stays</Link></main></>;
+  if (!stay) return <><SecondaryNav /><main className="page-empty"><h2>We couldn’t find that stay</h2><p>{error}</p><Link className="button button--dark" href="/#stays">Explore all stays</Link></main></>;
 
   const mapDelta = .025;
   const mapBox = `${stay.longitude - mapDelta}%2C${stay.latitude - mapDelta}%2C${stay.longitude + mapDelta}%2C${stay.latitude + mapDelta}`;
@@ -95,7 +95,7 @@ export function StayDetail({ slug, initialStay, initialReviews = [] }: { slug: s
   return <>
     <SecondaryNav />
     <main className="detail-page">
-      <Link className="detail-back" href="/"><Icon name="arrow-left" size={16} /> Back to stays</Link>
+      <Link className="detail-back" href="/#stays"><Icon name="arrow-left" size={16} /> Back to stays</Link>
       <div className="detail-heading"><div><h1>{stay.name}</h1><p><Icon name="star" size={13} /> {stay.rating.toFixed(2)} · {reviews.length ? `${reviews.length} guest reviews` : "New to Roam"} · {stay.location}</p></div><div className="detail-actions"><button type="button" onClick={shareStay}><Icon name="share" size={15} /> Share</button><button type="button" onClick={toggleSaved}><Icon name="heart" size={15} /> {saved ? "Saved" : "Save"}</button></div></div>
       <div className="detail-gallery" aria-label="Stay photos">
         {stay.images.slice(0, 5).map((photo, index) => (
@@ -137,7 +137,7 @@ export function StayDetail({ slug, initialStay, initialReviews = [] }: { slug: s
         </div>
 
         <aside className="detail-reserve" aria-label="Reserve this stay">
-          {bookingId ? <div className="reservation-success"><span className="success-check"><Icon name="check" /></span><p className="eyebrow">Reservation saved</p><h2>One step from away.</h2><p>Your reservation <strong>{bookingId}</strong> is saved as pending payment. A live payment gateway must be configured before this booking can be confirmed.</p><Link className="button button--dark button--full" href="/my-bookings">View your trip</Link></div> : <>
+          {bookingId ? <div className="reservation-success"><span className="success-check"><Icon name="check" /></span><p className="eyebrow">Reservation saved</p><h2>One step from away.</h2><p>Your reservation <strong>{bookingId}</strong> is saved as pending payment. A live payment gateway must be configured before this booking can be confirmed.</p><Link className="button button--dark button--full" href="/#stays">View your trip</Link></div> : <>
             <div className="detail-reserve__price"><strong>₹{rupees.format(stay.nightlyPrice)}</strong><span>night</span><span className="detail-reserve__rating"><Icon name="star" size={13} /> {stay.rating.toFixed(2)}</span></div>
             <label>Check in<input type="date" min={new Date().toISOString().slice(0, 10)} value={checkIn} onChange={(event) => { setCheckIn(event.target.value); if (checkOut && event.target.value >= checkOut) setCheckOut(""); }} /></label>
             <label>Check out<input type="date" min={checkIn || new Date().toISOString().slice(0, 10)} value={checkOut} onChange={(event) => setCheckOut(event.target.value)} /></label>
