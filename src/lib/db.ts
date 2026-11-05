@@ -327,6 +327,7 @@ function initializeDatabase() {
 
   database.exec(`
     PRAGMA journal_mode = WAL;
+    PRAGMA busy_timeout = 10000;
     PRAGMA foreign_keys = ON;
     CREATE TABLE IF NOT EXISTS categories (
       slug TEXT PRIMARY KEY,

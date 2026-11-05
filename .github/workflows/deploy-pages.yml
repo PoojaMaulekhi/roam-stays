@@ -24,6 +24,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Limit Next.js build workers
+        run: echo "NEXT_PRIVATE_BUILD_WORKER=1" >> $GITHUB_ENV
       - name: Exclude server-only routes from static export
         run: |
           mkdir -p /tmp/roam-export-excluded
