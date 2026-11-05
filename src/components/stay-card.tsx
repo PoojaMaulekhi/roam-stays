@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import type { Stay } from "@/lib/domain";
@@ -26,12 +25,12 @@ export function StayCard({
     <article className="stay-card">
       <div className="stay-card__media">
         <Link href={`/stays/${stay.slug}`} className="stay-card__image-link" aria-label={`View ${stay.name}`}>
-          <Image
+          <img
             src={stay.images[imageIndex]}
             alt={stay.name}
-            fill
-            sizes="(max-width: 640px) 90vw, (max-width: 900px) 45vw, (max-width: 1260px) 30vw, 23vw"
             className="stay-card__image"
+            loading="eager"
+            referrerPolicy="no-referrer"
           />
         </Link>
         <span className="stay-card__badge">{stay.rating >= 4.9 ? "Guest favourite" : stay.category}</span>

@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { AuthDialog } from "@/components/auth-dialog";
@@ -110,7 +109,7 @@ export function StayDetail({ slug, initialStay, initialReviews = [] }: { slug: s
             }}
             onPointerLeave={() => setLens(null)}
           >
-            <Image src={photo} alt={`${stay.name}, photo ${index + 1}`} width={1000} height={700} priority={index === 0} />
+            <img src={photo} alt={`${stay.name}, photo ${index + 1}`} loading={index === 0 ? "eager" : "lazy"} referrerPolicy="no-referrer" />
             {lens?.index === index && (
               <span
                 className="detail-gallery__lens"
