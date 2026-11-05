@@ -6,7 +6,7 @@ import type { Stay, StayFilters } from "@/lib/domain";
 const image = (id: string, width = 1100) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${width}&q=82`;
 
-const seedStays: Omit<Stay, "reviewCount">[] = [
+export const seedStays: Omit<Stay, "reviewCount">[] = [
   {
     slug: "glasshouse-in-the-coffee-hills",
     name: "Glasshouse in the coffee hills",
@@ -482,8 +482,10 @@ function initializeDatabase() {
   return database;
 }
 
-export const db = databaseGlobal.__roamDatabase ?? initializeDatabase();
-databaseGlobal.__roamDatabase = db;
+export const db = process.env.NEXT_PHASE === "phase-production-build" || process.argv.includes("build")
+  ? null as unknown as DatabaseSync
+  : databaseGlobal.__roamDatabase ?? initializeDatabase();
+if (db) databaseGlobal.__roamDatabase = db;
 
 function toStay(row: Record<string, unknown>): Stay {
   return {

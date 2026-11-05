@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { getStay, getStayReviews } from "@/lib/db";
+import { seedStays } from "@/lib/db";
 import { StayDetail } from "@/components/stay-detail";
 import { getStays } from "@/lib/db";
 
 export function generateStaticParams() {
-  return getStays().map((stay) => ({ slug: stay.slug }));
+  return seedStays.map((stay) => ({ slug: stay.slug }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -20,6 +20,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function StayPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const stay = getStay(slug);
-  return <StayDetail slug={slug} initialStay={stay} initialReviews={stay ? getStayReviews(slug) : []} />;
+  const stay = seedStays.find((item) => item.slug === slug);
+  return <StayDetail
+    slug={slug}
+    initialStay={stay ? { ...stay, reviewCount: 0 } : null}
+    initialReviews={[]}
+  />;
 }

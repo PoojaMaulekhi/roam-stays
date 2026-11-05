@@ -1,6 +1,17 @@
 import { RoamApp } from "@/components/roam-app";
-import { getCategories, getStays } from "@/lib/db";
+import { seedStays } from "@/lib/db";
 
 export default function Home() {
-  return <RoamApp initialStays={getStays()} initialCategories={getCategories()} />;
+  const stays = seedStays.map((stay) => ({ ...stay, reviewCount: 0 }));
+  const categories = [
+    { slug: "views", label: "Amazing views" },
+    { slug: "cabins", label: "Cabins" },
+    { slug: "beachfront", label: "Beachfront" },
+    { slug: "farms", label: "Farms" },
+    { slug: "mountains", label: "Mountains" },
+    { slug: "pools", label: "Amazing pools" },
+    { slug: "luxury", label: "Luxury stays" },
+    { slug: "trending", label: "Trending" },
+  ];
+  return <RoamApp initialStays={stays} initialCategories={categories} />;
 }
