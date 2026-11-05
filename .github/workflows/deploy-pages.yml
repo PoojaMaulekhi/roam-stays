@@ -34,6 +34,20 @@ jobs:
           mv src/app/my-bookings /tmp/roam-export-excluded/my-bookings
           mv src/proxy.ts /tmp/roam-export-excluded/proxy.ts
       - run: npm run build
+      - name: Redirect missing Pages routes
+        run: |
+          cat > out/404.html <<'EOF'
+          <!doctype html>
+          <html lang="en">
+            <head>
+              <meta charset="utf-8">
+              <meta http-equiv="refresh" content="0;url=/roam-stays/#stays">
+              <script>window.location.replace("/roam-stays/#stays");</script>
+              <title>Redirecting</title>
+            </head>
+            <body>Redirecting...</body>
+          </html>
+          EOF
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
