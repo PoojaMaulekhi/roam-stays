@@ -24,6 +24,13 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Exclude server-only routes from static export
+        run: |
+          mkdir -p /tmp/roam-export-excluded
+          mv src/app/api /tmp/roam-export-excluded/api
+          mv src/app/admin /tmp/roam-export-excluded/admin
+          mv src/app/my-bookings /tmp/roam-export-excluded/my-bookings
+          mv src/proxy.ts /tmp/roam-export-excluded/proxy.ts
       - run: npm run build
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
