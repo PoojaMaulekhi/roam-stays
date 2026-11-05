@@ -437,7 +437,7 @@ function initializeDatabase() {
 
   if (propertyCount === 0) {
     const insertStay = database.prepare(`
-      INSERT INTO properties (
+      INSERT OR IGNORE INTO properties (
         slug, name, location, region, distance, nightly_price, rating, category,
         bedrooms, beds, baths, max_guests, instant_book, images, host_name,
         host_since, description, amenities, latitude, longitude, cleaning_fee
