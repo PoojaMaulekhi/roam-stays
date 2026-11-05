@@ -17,6 +17,7 @@ const nextConfig: NextConfig = {
   },
   images: {
     remotePatterns: [{ protocol: "https", hostname: "images.unsplash.com" }],
+    unoptimized: true,
   },
   serverExternalPackages: ["node:sqlite"],
 };
