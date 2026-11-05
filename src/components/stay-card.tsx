@@ -19,11 +19,22 @@ export function StayCard({
   dates?: string;
 }) {
   const [imageIndex, setImageIndex] = useState(0);
+  const [lens, setLens] = useState<{ x: number; y: number; xPercent: number; yPercent: number } | null>(null);
   const setOffset = (offset: number) => setImageIndex((current) => (current + offset + stay.images.length) % stay.images.length);
 
   return (
     <article className="stay-card">
-      <div className="stay-card__media">
+      <div
+        className="stay-card__media"
+        onPointerMove={(event) => {
+          if (event.pointerType === "touch") return;
+          const rect = event.currentTarget.getBoundingClientRect();
+          const x = event.clientX - rect.left;
+          const y = event.clientY - rect.top;
+          setLens({ x, y, xPercent: x / rect.width * 100, yPercent: y / rect.height * 100 });
+        }}
+        onPointerLeave={() => setLens(null)}
+      >
         <Link href={`/stays/${stay.slug}`} className="stay-card__image-link" aria-label={`View ${stay.name}`}>
           <img
             src={stay.images[imageIndex]}
@@ -48,6 +59,18 @@ export function StayCard({
           <button className="card-arrow card-arrow--right" type="button" aria-label="Next photo" onClick={() => setOffset(1)}><Icon name="chevron-right" size={17} /></button>
           <div className="card-dots" aria-hidden="true">{stay.images.map((_, index) => <span className={index === imageIndex ? "is-active" : ""} key={index} />)}</div>
         </>}
+        {lens && (
+          <span
+            className="stay-card__lens"
+            style={{
+              left: lens.x,
+              top: lens.y,
+              backgroundImage: `url("${stay.images[imageIndex]}")`,
+              backgroundPosition: `${lens.xPercent}% ${lens.yPercent}%`,
+            }}
+            aria-hidden="true"
+          />
+        )}
       </div>
 
       <Link href={`/stays/${stay.slug}`} className="stay-card__details">
