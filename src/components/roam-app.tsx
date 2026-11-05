@@ -240,7 +240,7 @@ export function RoamApp() {
 
       <div className="category-bar-wrap">
         <nav className="category-bar" aria-label="Stay categories">
-          <button className={`category-item${activeCategory === "" ? " is-active" : ""}`} type="button" onClick={() => void selectCategory("")}><Icon name="globe" size={22} /><span>All stays</span></button>
+          <Link className={`category-item${activeCategory === "" ? " is-active" : ""}`} href="/#stays"><Icon name="globe" size={22} /><span>All stays</span></Link>
           {(categoryRecords.length ? categoryRecords : categories.map((category) => ({ slug: category.label.toLowerCase().replaceAll(" ", "-"), label: category.label }))).map((category) => {
             const configured = categories.find((item) => item.value === category.label || item.label === category.label);
             const icon: IconName = configured?.icon ?? (category.slug.includes("pool") ? "pool" : category.slug.includes("farm") ? "farm" : category.slug.includes("beach") ? "waves" : category.slug.includes("cabin") ? "cabin" : "sparkles");
