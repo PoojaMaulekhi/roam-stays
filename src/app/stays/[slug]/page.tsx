@@ -3,8 +3,6 @@ import { getStay } from "@/lib/db";
 import { StayDetail } from "@/components/stay-detail";
 import { getStays } from "@/lib/db";
 
-export const instant = false;
-
 export function generateStaticParams() {
   return getStays().map((stay) => ({ slug: stay.slug }));
 }

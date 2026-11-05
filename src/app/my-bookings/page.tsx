@@ -4,8 +4,6 @@ import { db } from "@/lib/db";
 import { readSessionToken } from "@/lib/session";
 import TripsPage from "@/app/trips/page";
 
-export const instant = false;
-
 export default async function MyBookingsPage() {
   const cookieStore = await cookies();
   const session = readSessionToken(cookieStore.get("roam_session")?.value);
