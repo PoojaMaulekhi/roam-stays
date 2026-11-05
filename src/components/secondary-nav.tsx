@@ -22,7 +22,7 @@ export function SecondaryNav() {
   return <>
     <header className="secondary-header">
       <Link className="brand-mark" href="/"><span className="brand-mark__symbol">r.</span><span>roam<span className="brand-mark__sub">stays</span></span></Link>
-      <nav className="secondary-header__links" aria-label="Account navigation"><Link href="/">Find a stay</Link><Link href="/my-bookings">My bookings</Link><Link href="/saved">Saved stays</Link>{user?.role === "admin" && <Link href="/admin">Admin portal</Link>}</nav>
+      <nav className="secondary-header__links" aria-label="Account navigation"><Link href="/#stays">Find a stay</Link><Link href="/#stays">My bookings</Link><Link href="/#stays">Saved stays</Link>{user?.role === "admin" && <Link href="/#stays">Admin portal</Link>}</nav>
       <div className="secondary-header__account">
         {user ? <><span>{user.name.split(" ")[0]}</span><button className="icon-button" type="button" aria-label="Sign out" onClick={logout}><Icon name="user" size={18} /></button></> : <button className="button button--outline" type="button" onClick={() => setAuthOpen(true)}>Sign in</button>}
       </div>

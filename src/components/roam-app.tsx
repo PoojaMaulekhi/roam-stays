@@ -38,9 +38,14 @@ function buildQuery(filters: StayFilters, checkIn: string, checkOut: string) {
   return query.toString();
 }
 
-export function RoamApp() {
-  const [stays, setStays] = useState<Stay[]>([]);
-  const [categoryRecords, setCategoryRecords] = useState<{ slug: string; label: string }[]>([]);
+type RoamAppProps = {
+  initialStays?: Stay[];
+  initialCategories?: { slug: string; label: string }[];
+};
+
+export function RoamApp({ initialStays = [], initialCategories = [] }: RoamAppProps) {
+  const [stays, setStays] = useState<Stay[]>(initialStays);
+  const [categoryRecords, setCategoryRecords] = useState<{ slug: string; label: string }[]>(initialCategories);
   const [saved, setSaved] = useState<Set<string>>(new Set());
   const [user, setUser] = useState<SessionUser | null>(null);
   const [authOpen, setAuthOpen] = useState(false);
@@ -187,11 +192,11 @@ export function RoamApp() {
           <Link className="brand-mark" href="/" aria-label="Roam stays home"><span className="brand-mark__symbol">r.</span><span>roam<span className="brand-mark__sub">stays</span></span></Link>
           <nav className="header-links" aria-label="Main navigation">
             <a className="header-links__active" href="#stays">Find a stay</a>
-            <a href="/my-bookings">My bookings</a>
-            <a href="/saved">Saved</a>
+            <a href="/#stays">My bookings</a>
+            <a href="/#stays">Saved</a>
           </nav>
           <div className="header-actions">
-            {user?.role === "admin" && <a className="host-link" href="/admin">Admin portal <span>↗</span></a>}
+            {user?.role === "admin" && <a className="host-link" href="/#stays">Admin portal <span>↗</span></a>}
             <div className="account-anchor">
               <button className="account-button" type="button" aria-label="Open account menu" aria-expanded={accountMenuOpen} onClick={() => setAccountMenuOpen((open) => !open)}>
                 <Icon name="menu" size={18} /><span className="account-avatar"><Icon name="user" size={16} /></span>
@@ -199,13 +204,13 @@ export function RoamApp() {
               {accountMenuOpen && <div className="account-menu" role="menu">
                 {user ? <>
                   <p className="account-menu__hello">Hello, {user.name.split(" ")[0]}</p>
-                  <Link href="/my-bookings" role="menuitem" onClick={() => setAccountMenuOpen(false)}>My bookings</Link>
-                  <Link href="/saved" role="menuitem" onClick={() => setAccountMenuOpen(false)}>Saved stays</Link>
-                  {user.role === "admin" && <Link href="/admin" role="menuitem" onClick={() => setAccountMenuOpen(false)}>Manage Roam</Link>}
+                  <Link href="/#stays" role="menuitem" onClick={() => setAccountMenuOpen(false)}>My bookings</Link>
+                  <Link href="/#stays" role="menuitem" onClick={() => setAccountMenuOpen(false)}>Saved stays</Link>
+                  {user.role === "admin" && <Link href="/#stays" role="menuitem" onClick={() => setAccountMenuOpen(false)}>Manage Roam</Link>}
                   <button type="button" role="menuitem" onClick={logout}>Sign out</button>
                 </> : <>
                   <button type="button" className="account-menu__strong" onClick={() => { setAuthMessage(""); setAuthOpen(true); setAccountMenuOpen(false); }}>Sign in or create an account</button>
-                  <Link href="/saved" role="menuitem" onClick={() => setAccountMenuOpen(false)}>Saved stays</Link>
+                  <Link href="/#stays" role="menuitem" onClick={() => setAccountMenuOpen(false)}>Saved stays</Link>
                 </>}
               </div>}
             </div>

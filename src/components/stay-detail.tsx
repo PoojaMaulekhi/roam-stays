@@ -13,10 +13,10 @@ type StayResult = { stay: Stay; reviews: Review[] };
 type BookingResult = { booking?: { id: string; total: number }; error?: string };
 const rupees = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 });
 
-export function StayDetail({ slug }: { slug: string }) {
-  const [stay, setStay] = useState<Stay | null>(null);
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [loading, setLoading] = useState(true);
+export function StayDetail({ slug, initialStay, initialReviews = [] }: { slug: string; initialStay: Stay | null; initialReviews?: Review[] }) {
+  const [stay, setStay] = useState<Stay | null>(initialStay);
+  const [reviews, setReviews] = useState<Review[]>(initialReviews);
+  const [loading, setLoading] = useState(false);
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState(2);
@@ -29,10 +29,6 @@ export function StayDetail({ slug }: { slug: string }) {
   const [lens, setLens] = useState<{ index: number; x: number; y: number; xPercent: number; yPercent: number } | null>(null);
 
   useEffect(() => {
-    fetch(`/api/stays/${encodeURIComponent(slug)}`).then(async (response) => {
-      if (!response.ok) throw new Error("This stay couldn’t be found.");
-      return response.json() as Promise<StayResult>;
-    }).then((result) => { setStay(result.stay); setReviews(result.reviews); }).catch((loadError: unknown) => setError(loadError instanceof Error ? loadError.message : "Could not load this stay.")).finally(() => setLoading(false));
     fetch("/api/auth/me").then((response) => response.json()).then((result: { user: SessionUser | null }) => setUser(result.user)).catch(() => undefined);
   }, [slug]);
 
