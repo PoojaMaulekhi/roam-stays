@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { seedStays } from "@/lib/db";
 import { StayDetail } from "@/components/stay-detail";
-import { getStays } from "@/lib/db";
 
 export function generateStaticParams() {
   return seedStays.map((stay) => ({ slug: stay.slug }));
@@ -9,7 +8,7 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const stay = getStay(slug);
+  const stay = seedStays.find((item) => item.slug === slug);
   if (!stay) return { title: "Stay not found" };
   return {
     title: stay.name,
