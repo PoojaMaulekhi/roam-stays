@@ -74,7 +74,7 @@ export function StayCard({
       </div>
 
       <Link href={`/stays/${stay.slug}`} className="stay-card__details">
-        <div className="stay-card__title-row"><h2>{stay.location}</h2><span className="stay-card__rating"><Icon name="star" size={13} />{stay.rating.toFixed(2)}</span></div>
+        <div className="stay-card__title-row"><h2>{stay.location}</h2><span className="stay-card__rating"><Icon name="star" size={13} />{stay.rating.toFixed(2)} <small>({stay.reviewCount})</small></span></div>
         <p>{stay.distance}</p>
         <p>{dates || "Available throughout the year"}</p>
         <p className="stay-card__price"><strong>₹{rupees.format(stay.nightlyPrice)}</strong> night</p>

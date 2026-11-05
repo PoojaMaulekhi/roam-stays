@@ -317,6 +317,69 @@ export const seedStays: Omit<Stay, "reviewCount">[] = [
   },
 ];
 
+export const seedReviewCounts: Record<string, number> = {
+  "glasshouse-in-the-coffee-hills": 128,
+  "sea-facing-home-in-goa": 96,
+  "a-frame-above-the-clouds": 84,
+  "pondicherry-courtyard-retreat": 112,
+  "private-pool-in-jaipur": 73,
+  "minimal-home-in-the-aravallis": 141,
+  "bamboo-cabin-in-wayanad": 67,
+  "lake-house-in-kumarakom": 103,
+  "farmstay-near-pune": 58,
+  "design-loft-in-bengaluru": 89,
+  "mountain-cottage-in-kasauli": 76,
+};
+
+export type SeedReview = { name: string; rating: number; comment: string; createdAt: string };
+
+export const seedReviews: Record<string, SeedReview[]> = {
+  "glasshouse-in-the-coffee-hills": [
+    { name: "Aarav Mehta", rating: 5, comment: "The morning light over the estate was unreal. We slowed right down and loved every minute.", createdAt: "October 2026" },
+    { name: "Priya Shah", rating: 5, comment: "Beautiful glasshouse, spotless rooms and the most peaceful coffee-hill views.", createdAt: "September 2026" },
+  ],
+  "sea-facing-home-in-goa": [
+    { name: "Nisha Kapoor", rating: 5, comment: "A beautiful, calm home with thoughtful details. The courtyard became our favourite place.", createdAt: "October 2026" },
+    { name: "Kabir Rao", rating: 5, comment: "Close to the beach but wonderfully quiet. We would happily return.", createdAt: "August 2026" },
+  ],
+  "a-frame-above-the-clouds": [
+    { name: "Ritu Verma", rating: 5, comment: "Exactly the kind of hill escape we needed. Clear directions, kind hosting and a spectacular view.", createdAt: "September 2026" },
+    { name: "Samarth Jain", rating: 4, comment: "Cosy A-frame and incredible sunsets. The walk to the lake was easy.", createdAt: "July 2026" },
+  ],
+  "pondicherry-courtyard-retreat": [
+    { name: "Meera Iyer", rating: 5, comment: "The courtyard is serene and the whole house feels full of charm.", createdAt: "October 2026" },
+    { name: "Arjun Menon", rating: 5, comment: "A wonderful base for exploring Pondicherry. Very comfortable and beautifully maintained.", createdAt: "September 2026" },
+  ],
+  "private-pool-in-jaipur": [
+    { name: "Tara Singh", rating: 5, comment: "Our pool evenings were magical, and the rooms were spacious and spotless.", createdAt: "October 2026" },
+    { name: "Dev Patel", rating: 4, comment: "Great location and a lovely private pool. The host was responsive throughout.", createdAt: "August 2026" },
+  ],
+  "minimal-home-in-the-aravallis": [
+    { name: "Ishaan Bose", rating: 5, comment: "Minimal, peaceful and thoughtfully designed. The Aravalli views are memorable.", createdAt: "September 2026" },
+    { name: "Ananya Gupta", rating: 5, comment: "A perfect quiet escape with excellent food recommendations nearby.", createdAt: "July 2026" },
+  ],
+  "bamboo-cabin-in-wayanad": [
+    { name: "Neha Thomas", rating: 5, comment: "Surrounded by greenery and birdsong. The cabin was comfortable and very unique.", createdAt: "October 2026" },
+    { name: "Rohan Das", rating: 4, comment: "A lovely nature stay. The rainy-season views were worth the short drive.", createdAt: "June 2026" },
+  ],
+  "lake-house-in-kumarakom": [
+    { name: "Lakshmi Nair", rating: 5, comment: "Watching the sunrise over the lake from the deck was unforgettable.", createdAt: "September 2026" },
+    { name: "Aditya Kumar", rating: 5, comment: "Clean, peaceful and genuinely warm hospitality throughout our stay.", createdAt: "August 2026" },
+  ],
+  "farmstay-near-pune": [
+    { name: "Sana Shaikh", rating: 5, comment: "Fresh air, open fields and a very relaxed weekend. The children loved it.", createdAt: "October 2026" },
+    { name: "Vikram Joshi", rating: 4, comment: "Simple, comfortable and close enough for a short city escape.", createdAt: "August 2026" },
+  ],
+  "design-loft-in-bengaluru": [
+    { name: "Maya Reddy", rating: 5, comment: "Stylish loft with a brilliant location. Check-in was smooth and everything worked well.", createdAt: "October 2026" },
+    { name: "Rahul Suri", rating: 5, comment: "One of the best work-friendly stays I have booked in Bengaluru.", createdAt: "September 2026" },
+  ],
+  "mountain-cottage-in-kasauli": [
+    { name: "Karan Malhotra", rating: 5, comment: "The cedar deck and fireplace made our trip special. Very cosy in the evenings.", createdAt: "September 2026" },
+    { name: "Pooja Khanna", rating: 5, comment: "Beautiful cottage, clear instructions and a wonderful mountain setting.", createdAt: "July 2026" },
+  ],
+};
+
 type DatabaseGlobal = typeof globalThis & { __roamDatabase?: DatabaseSync };
 const databaseGlobal = globalThis as DatabaseGlobal;
 

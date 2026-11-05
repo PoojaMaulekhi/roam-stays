@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { seedStays } from "@/lib/db";
+import { seedReviewCounts, seedReviews, seedStays } from "@/lib/db";
 import { StayDetail } from "@/components/stay-detail";
 
 export function generateStaticParams() {
@@ -22,7 +22,7 @@ export default async function StayPage({ params }: { params: Promise<{ slug: str
   const stay = seedStays.find((item) => item.slug === slug);
   return <StayDetail
     slug={slug}
-    initialStay={stay ? { ...stay, reviewCount: 0 } : null}
-    initialReviews={[]}
+    initialStay={stay ? { ...stay, reviewCount: seedReviewCounts[slug] ?? 0 } : null}
+    initialReviews={seedReviews[slug] ?? []}
   />;
 }

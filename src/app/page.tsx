@@ -1,8 +1,8 @@
 import { RoamApp } from "@/components/roam-app";
-import { seedStays } from "@/lib/db";
+import { seedReviewCounts, seedStays } from "@/lib/db";
 
 export default function Home() {
-  const stays = seedStays.map((stay) => ({ ...stay, reviewCount: 0 }));
+  const stays = seedStays.map((stay) => ({ ...stay, reviewCount: seedReviewCounts[stay.slug] ?? 0 }));
   const categories = [
     { slug: "views", label: "Amazing views" },
     { slug: "cabins", label: "Cabins" },
