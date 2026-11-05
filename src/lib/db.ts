@@ -603,7 +603,8 @@ export function getStay(slug: string): Stay | null {
 }
 
 export function getCategories() {
-  return db.prepare("SELECT slug, label FROM categories ORDER BY sort_order").all();
+  return db.prepare("SELECT slug, label FROM categories ORDER BY sort_order").all()
+    .map((row) => ({ slug: String(row.slug), label: String(row.label) }));
 }
 
 export function getStayReviews(slug: string) {
@@ -611,7 +612,12 @@ export function getStayReviews(slug: string) {
     SELECT user_name AS name, rating, comment, created_at AS createdAt
     FROM reviews WHERE property_slug = ? AND status = 'approved'
     ORDER BY created_at DESC LIMIT 20
-  `).all(slug);
+  `).all(slug).map((row) => ({
+    name: String(row.name),
+    rating: Number(row.rating),
+    comment: String(row.comment),
+    createdAt: String(row.createdAt),
+  }));
 }
 
 export function getWishlist(userId: number) {
